@@ -1,5 +1,3 @@
-
-
-pub fn run() -> crate::Result<()>{
-    Ok(()`)
+pub fn run() -> crate::Result<()> {
+    Ok(())
 }

@@ -2,11 +2,23 @@ use crate::config::IpVersion;
 use crate::constants::word::WORDS;
 use pnet::datalink;
 use rand::seq::SliceRandom;
-use sha2::{Digest, Sha256, Sha512};
+use serde::de::DeserializeOwned;
+use serde::Serialize;
+use sha2::{Digest, Sha256};
 use std::net::IpAddr;
 use tokio::net::UdpSocket;
 use trust_dns_resolver::config::*;
 use trust_dns_resolver::Resolver;
+
+pub fn from_json<T: DeserializeOwned>(json: &str) -> crate::Result<T> {
+    let data = serde_json::from_str(json)?;
+    Ok(data)
+}
+
+pub fn to_json<T: ?Sized + Serialize>(t: &T) -> crate::Result<String> {
+    let json = serde_json::to_string(t)?;
+    Ok(json)
+}
 
 pub fn sha256(data: &[u8]) -> crate::Result<String> {
     let mut hasher = Sha256::new();

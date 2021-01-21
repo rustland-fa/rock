@@ -1,3 +1,6 @@
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Message {
     type_message: String,
     content_message: String,
@@ -5,10 +8,16 @@ pub struct Message {
     number: i32,
 }
 
-impl std::fmt::Display for Message {}
+impl std::fmt::Display for Message {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        todo!()
+    }
+}
 
 impl Message {
-    pub fn send(&self) -> crate::Result<String> {}
+    pub fn send(&self) -> crate::Result<()> {
+        Ok(())
+    }
 
     pub fn encode(&self) {}
 
