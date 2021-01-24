@@ -1,7 +1,9 @@
 use crate::config::IpVersion;
+use crate::config::NONCE_LENGTH;
 use crate::constants::word::WORDS;
 use pnet::datalink;
 use rand::seq::SliceRandom;
+use rand::{thread_rng, Rng};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use sha2::{Digest, Sha256};
@@ -9,6 +11,11 @@ use std::net::IpAddr;
 use tokio::net::UdpSocket;
 use trust_dns_resolver::config::*;
 use trust_dns_resolver::Resolver;
+
+pub fn generate_random_bytes() -> [u8; NONCE_LENGTH] {
+    // const generic support needed
+    thread_rng().gen::<[u8; NONCE_LENGTH]>()
+}
 
 pub fn from_json<T: DeserializeOwned>(json: &str) -> crate::Result<T> {
     let data = serde_json::from_str(json)?;

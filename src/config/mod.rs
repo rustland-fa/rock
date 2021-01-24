@@ -3,6 +3,7 @@ use once_cell::sync::Lazy;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
 pub const BUFFER_SIZE: usize = 1024 * 64;
+pub const NONCE_LENGTH: usize = 12;
 pub const DEFAULT_RELAY_ADDR_V4: &str = "croc.schollz.com";
 pub const DEFAULT_RELAY_ADDR_V6: &str = "croc6.schollz.com";
 pub const DEFAULT_POTR: u32 = 1000;

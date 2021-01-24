@@ -2,6 +2,12 @@ use rock::config;
 use rock::utils;
 
 #[test]
+pub fn random_bytes_test() {
+    let random_bytes = utils::generate_random_bytes();
+    assert_eq!(random_bytes.len(), config::NONCE_LENGTH);
+}
+
+#[test]
 fn sha256_test() {
     let hash = utils::sha256(b"Hello World!").unwrap();
     println!("sha256 Hello World! is => {:?}", hash);
