@@ -17,6 +17,11 @@ pub fn generate_random_bytes() -> [u8; NONCE_LENGTH] {
     thread_rng().gen::<[u8; NONCE_LENGTH]>()
 }
 
+pub fn json_bytes_to_data<T: DeserializeOwned>(slice: &[u8]) -> crate::Result<T> {
+    let data = serde_json::from_slice(slice)?;
+    Ok(data)
+}
+
 pub fn from_json<T: DeserializeOwned>(json: &str) -> crate::Result<T> {
     let data = serde_json::from_str(json)?;
     Ok(data)
