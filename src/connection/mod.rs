@@ -1,8 +1,10 @@
 use bytes::{Buf, BytesMut};
 use tokio::{
-    io::{AsyncReadExt, BufWriter},
+    io::{AsyncReadExt, AsyncWriteExt, BufWriter},
     net::TcpStream,
 };
+
+use crate::constants::SPLITTER;
 #[derive(Debug)]
 pub struct Connection {
     pub stream: BufWriter<TcpStream>,
@@ -15,7 +17,7 @@ impl Connection {
         Connection {
             stream: BufWriter::new(socket),
             buffer: BytesMut::with_capacity(4 * 1024),
-            last_index: 1,
+            last_index: 0,
         }
     }
 
@@ -34,23 +36,32 @@ impl Connection {
         }
     }
 
-    pub fn parse_frame_bytes(&mut self) -> crate::Result<Option<Vec<u8>>> {
-        let mut res = None;
-        let mut read_len = 0;
-        for (i, b) in self.buffer[self.last_index..].iter().enumerate() {
-            read_len = i;
-            if self.buffer[i - 1] == b'\r' && *b == b'\n' {
-                res = Some(hex::decode(&self.buffer[..i - 2])?.to_vec());
+    fn parse_frame_bytes(&mut self) -> crate::Result<Option<Vec<u8>>> {
+        let len_buffer = self.buffer[..].len();
+        if len_buffer < self.last_index + 2 {
+            return Ok(None);
+        }
+        for i in self.last_index..len_buffer - 1 {
+            if self.buffer[i] == b'\r' && self.buffer[i + 1] == b'\n' {
+                let res = Some(hex::decode(&self.buffer[..i - 2])?.to_vec());
+                self.buffer.advance(len_buffer);
+                self.last_index = 0;
+                return Ok(res);
             }
+            println!(
+                "i is {} {}",
+                self.buffer[i] as char,
+                self.buffer[i + 1] as char
+            );
         }
-        if res.is_some() {
-            self.buffer.advance(read_len);
-            self.last_index = 1;
-        } else {
-            self.last_index = read_len;
-        }
-        Ok(res)
+        self.last_index = len_buffer - 1;
+        Ok(None)
     }
 
-    pub fn write(&self) {}
+    pub async fn write(&mut self, src: &[u8]) -> crate::Result<()> {
+        self.stream.write(src).await?;
+        self.stream.write(SPLITTER).await?;
+        self.stream.flush().await?;
+        Ok(())
+    }
 }

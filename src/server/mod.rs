@@ -25,7 +25,7 @@ pub struct Room {
 }
 
 impl Server {
-    fn new(port: u32, banner: &str, password: &str) -> Self {
+    pub fn new(port: u32, banner: &str, password: &str) -> Self {
         Self {
             port,
             banner: banner.to_string(),
@@ -34,15 +34,9 @@ impl Server {
         }
     }
 
-    pub async fn run(port: u32, banner: &str, password: &str) -> crate::Result<()> {
-        let server = Self::new(port, banner, password);
-        server.start().await
-    }
-
-    async fn start(&self) -> crate::Result<()> {
+    pub async fn run(&self) -> crate::Result<()> {
         //Self::delete_rooms(self.rooms.clone()).await;
-        self.listen().await?;
-        Ok(())
+        self.start().await
     }
 
     async fn delete_rooms(rooms: Arc<Mutex<HashMap<String, Room>>>) {
@@ -56,7 +50,7 @@ impl Server {
         });
     }
 
-    pub async fn listen(&self) -> crate::Result<()> {
+    pub async fn start(&self) -> crate::Result<()> {
         let listener = TcpListener::bind(format!("127.0.0.1:{}", self.port)).await?;
         loop {
             let (socket, socket_addr) = listener.accept().await.unwrap();
@@ -66,12 +60,18 @@ impl Server {
         }
     }
 
-    async fn handler(_rooms: Arc<Mutex<HashMap<String, Room>>>, mut socket: TcpStream) {
+    async fn handler(
+        _rooms: Arc<Mutex<HashMap<String, Room>>>,
+        mut socket: TcpStream,
+    ) -> crate::Result<()> {
         println!("handler start");
-        let mut buf = String::new();
-        socket.read_to_string(&mut buf).await.unwrap();
-        println!("read buf {}", buf);
-        socket.write(b"thanks").await.unwrap();
+        let mut conn = Connection::new(socket);
+        let data = conn.read().await?;
+        if let Some(d) = data {
+            println!("{}", std::str::from_utf8(&d)?);
+        }
+        conn.write(b"Hello World !!!").await?;
+        Ok(())
     }
 }
 
