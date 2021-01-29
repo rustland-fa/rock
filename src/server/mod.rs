@@ -62,7 +62,7 @@ impl Server {
 
     async fn handler(
         _rooms: Arc<Mutex<HashMap<String, Room>>>,
-        mut socket: TcpStream,
+        socket: TcpStream,
     ) -> crate::Result<()> {
         println!("handler start");
         let mut conn = Connection::new(socket);
@@ -70,7 +70,7 @@ impl Server {
         if let Some(d) = data {
             println!("{}", std::str::from_utf8(&d)?);
         }
-        conn.write(b"Hello World !!!").await?;
+        conn.write(b"Hello How Are You !!!").await?;
         Ok(())
     }
 }

@@ -43,23 +43,18 @@ impl Connection {
         }
         for i in self.last_index..len_buffer - 1 {
             if self.buffer[i] == b'\r' && self.buffer[i + 1] == b'\n' {
-                let res = Some(hex::decode(&self.buffer[..i - 2])?.to_vec());
+                let res = Some(hex::decode(&self.buffer[..i])?.to_vec());
                 self.buffer.advance(len_buffer);
                 self.last_index = 0;
                 return Ok(res);
             }
-            println!(
-                "i is {} {}",
-                self.buffer[i] as char,
-                self.buffer[i + 1] as char
-            );
         }
         self.last_index = len_buffer - 1;
         Ok(None)
     }
 
     pub async fn write(&mut self, src: &[u8]) -> crate::Result<()> {
-        self.stream.write(src).await?;
+        self.stream.write(hex::encode(src).as_bytes()).await?;
         self.stream.write(SPLITTER).await?;
         self.stream.flush().await?;
         Ok(())
