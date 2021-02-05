@@ -66,13 +66,11 @@ impl Server {
     ) -> crate::Result<()> {
         println!("handler start");
         let mut conn = Connection::new(socket);
-        let data = conn.read().await?;
+        let data = conn.read_to_end().await?;
         if let Some(d) = data {
             println!("{}", std::str::from_utf8(&d)?);
         }
-        conn.write(b"Hello How Are You !!!").await?;
+        conn.write_all(b"Hello How Are You !!!").await?;
         Ok(())
     }
 }
-
-pub fn pipe() {}
