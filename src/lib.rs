@@ -18,4 +18,8 @@ pub mod constants;
 
 pub mod connection;
 
+pub mod progress;
+
+pub mod frame;
+
 pub mod server;
