@@ -12,10 +12,6 @@ use tokio::{net::UdpSocket, time::Instant};
 use trust_dns_resolver::config::*;
 use trust_dns_resolver::Resolver;
 
-pub fn is_expire(instant: Instant) -> bool {
-    instant.saturating_duration_since(Instant::now()) == Duration::from_nanos(0)
-}
-
 pub fn generate_random_bytes() -> [u8; NONCE_LENGTH] {
     // const generic support needed
     thread_rng().gen::<[u8; NONCE_LENGTH]>()

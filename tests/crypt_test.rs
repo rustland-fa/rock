@@ -1,6 +1,6 @@
-use rock::config::NONCE_LENGTH;
+
 use rock::crypt::{decrypt, encrypt};
-use rock::utils::generate_random_bytes;
+
 
 #[test]
 pub fn crypt_test() {
