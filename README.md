@@ -4,7 +4,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/d2we8j2c58n6wq7o?svg=true)](https://ci.appveyor.com/project/robatipoor/rock)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-rock is client tool 
+[croc](https://github.com/schollz/croc) rewritten with rust 
 
 
 **install**
