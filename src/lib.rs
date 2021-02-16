@@ -22,4 +22,6 @@ pub mod progress;
 
 pub mod frame;
 
+pub mod client;
+
 pub mod server;

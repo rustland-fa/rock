@@ -10,4 +10,6 @@ pub async fn main() {
         "Response Client B is => {:?}",
         std::str::from_utf8(&data).unwrap()
     );
+    conn.write_all(b"room1").await.unwrap();
+    let c = conn.read().await.unwrap();
 }

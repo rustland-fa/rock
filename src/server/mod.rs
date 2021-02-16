@@ -14,25 +14,23 @@ use crate::server::room::Room;
 pub mod room;
 
 pub struct Server {
-    port: u32,
     banner: String,
     password: String,
     rooms: Arc<Mutex<HashMap<String, Room>>>,
 }
 
 impl Server {
-    pub fn new(port: u32, banner: &str, password: &str) -> Self {
+    pub fn new(banner: &str, password: &str) -> Self {
         Self {
-            port,
             banner: banner.to_string(),
             password: password.to_string(),
             rooms: Arc::new(Mutex::new(HashMap::new())),
         }
     }
 
-    pub async fn run(&self) -> crate::Result<()> {
-        //Self::delete_rooms(self.rooms.clone()).await;
-        self.start().await
+    pub async fn run(&self, addr: &str) -> crate::Result<()> {
+        Self::delete_rooms(self.rooms.clone()).await;
+        self.start(addr).await
     }
 
     async fn delete_rooms(rooms: Arc<Mutex<HashMap<String, Room>>>) {
@@ -46,8 +44,8 @@ impl Server {
         });
     }
 
-    pub async fn start(&self) -> crate::Result<()> {
-        let listener = TcpListener::bind(format!("127.0.0.1:{}", self.port)).await?;
+    async fn start(&self, addr: &str) -> crate::Result<()> {
+        let listener = TcpListener::bind(addr).await?;
         loop {
             let (socket, socket_addr) = listener.accept().await.unwrap();
             let rooms = self.rooms.clone();
@@ -74,6 +72,7 @@ impl Server {
             let mut guard = rooms.lock().await;
             if let Some(room) = guard.get_mut(key_room) {
                 if !room.is_full() && !room.is_expire() {
+                    conn.write_all(b"ok").await.unwrap();
                     room.set_second_conn(conn);
                 } else {
                     let msg = if room.is_full() {
@@ -87,8 +86,10 @@ impl Server {
                 let room = guard.remove(key_room).unwrap();
                 pipe(room.first, room.second.unwrap()).await.unwrap();
             } else {
+                conn.write_all(b"ok").await.unwrap();
                 let room = Room::new(conn);
                 guard.insert(key_room.to_string(), room);
+                println!("add new room with key {}", key_room);
             }
         }
         Ok(())
