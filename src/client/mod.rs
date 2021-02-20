@@ -1,6 +1,11 @@
 use tokio::net::TcpStream;
 
+use crate::args::Args;
 use crate::connection::Connection;
+
+pub struct Client {
+    pub args: Args,
+}
 
 pub async fn new_connection(addr: &str, password: &str, room: &str) -> crate::Result<()> {
     let socket = TcpStream::connect(addr).await?;

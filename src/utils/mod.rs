@@ -7,7 +7,7 @@ use rand::{thread_rng, Rng};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use sha2::{Digest, Sha256};
-use std::{net::IpAddr, time::Duration};
+use std::{net::IpAddr, path::PathBuf, time::Duration};
 use tokio::{net::UdpSocket, time::Instant};
 use trust_dns_resolver::config::*;
 use trust_dns_resolver::Resolver;
@@ -105,4 +105,22 @@ pub fn get_rand_word(amount: usize) -> String {
         .map(|s| s.to_string())
         .collect::<Vec<String>>()
         .join("-")
+}
+
+// Toml
+pub fn get_config_file() -> Option<String> {
+    get_home_dir_config()
+        .and_then(|p| {
+            Some(
+                p.join("config.toml")
+                    .to_str()
+                    .to_owned()
+                    .and_then(|p| Some(p.to_string())),
+            )
+        })
+        .flatten()
+}
+
+pub fn get_home_dir_config() -> Option<PathBuf> {
+    dirs::home_dir().and_then(|p| Some(p.join(".config").join("rock")))
 }
