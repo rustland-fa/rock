@@ -106,21 +106,3 @@ pub fn get_rand_word(amount: usize) -> String {
         .collect::<Vec<String>>()
         .join("-")
 }
-
-// Toml
-pub fn get_config_file() -> Option<String> {
-    get_home_dir_config()
-        .and_then(|p| {
-            Some(
-                p.join("config.toml")
-                    .to_str()
-                    .to_owned()
-                    .and_then(|p| Some(p.to_string())),
-            )
-        })
-        .flatten()
-}
-
-pub fn get_home_dir_config() -> Option<PathBuf> {
-    dirs::home_dir().and_then(|p| Some(p.join(".config").join("rock")))
-}
