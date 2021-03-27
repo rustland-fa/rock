@@ -6,6 +6,7 @@
 
 [croc](https://github.com/schollz/croc) rewritten with rust 
 
+![Rock Logo](rock.png)
 ## Important: rock is still under development and is not ready.
 
 **Build and install**
