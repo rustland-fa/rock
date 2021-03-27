@@ -4,10 +4,10 @@ version = "0.1.0"
 authors = ["mahdi robatipoor <mahdi.robatipoor@gmail.com>"]
 edition = "2018"
 description = "share file "
-homepage = "https://github.com/robatipoor/rock"
+homepage = "https://github.com/rustland-fa/rock"
 keywords = ["share", "file","rock"]
 license = "MIT"
-repository = "https://github.com/robatipoor/rock"
+repository = "https://github.com/rustland-fa/rock"
 
 [dependencies]
 aes-gcm-siv = "0.9.0"
