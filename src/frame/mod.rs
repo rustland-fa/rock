@@ -6,9 +6,6 @@ pub enum PartFrame<T: std::fmt::Debug> {
 
 impl<T: std::fmt::Debug> PartFrame<T> {
     fn is_end(&self) -> bool {
-        match self {
-            PartFrame::End(_) => true,
-            _ => false,
-        }
+        matches!(self, PartFrame::End(_))
     }
 }

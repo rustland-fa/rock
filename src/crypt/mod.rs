@@ -1,7 +1,8 @@
-use crate::config::NONCE_LENGTH;
-use crate::utils::generate_random_bytes;
-use aes_gcm_siv::aead::{generic_array::GenericArray, Aead, NewAead};
-use aes_gcm_siv::Aes256GcmSiv;
+use crate::{config::NONCE_LENGTH, utils::generate_random_bytes};
+use aes_gcm_siv::{
+    aead::{generic_array::GenericArray, Aead, NewAead},
+    Aes256GcmSiv,
+};
 
 pub fn encrypt(key: &[u8], plain_txt_msg: &[u8]) -> crate::Result<Vec<u8>> {
     if key.len() < 32 {

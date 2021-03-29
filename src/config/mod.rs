@@ -1,5 +1,4 @@
-use crate::args::Args;
-use crate::utils;
+use crate::{args::Args, utils};
 use once_cell::sync::Lazy;
 use std::{
     net::{IpAddr, Ipv4Addr, Ipv6Addr},
@@ -38,17 +37,15 @@ pub static CONFIG_ARGS: Lazy<Args> =
 
 pub fn get_config_file() -> Option<String> {
     get_home_dir_config()
-        .and_then(|p| {
-            Some(
-                p.join("config.toml")
-                    .to_str()
-                    .to_owned()
-                    .and_then(|p| Some(p.to_string())),
-            )
+        .map(|p| {
+            p.join("config.toml")
+                .to_str()
+                .to_owned()
+                .map(|p| p.to_string())
         })
         .flatten()
 }
 
 pub fn get_home_dir_config() -> Option<PathBuf> {
-    dirs::home_dir().and_then(|p| Some(p.join(".config").join("rock")))
+    dirs::home_dir().map(|p| p.join(".config").join("rock"))
 }

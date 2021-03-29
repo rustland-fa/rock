@@ -1,5 +1,4 @@
-use rock::config;
-use rock::utils;
+use rock::{config, utils};
 
 #[test]
 pub fn random_bytes_test() {

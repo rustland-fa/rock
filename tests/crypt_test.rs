@@ -1,6 +1,4 @@
-
 use rock::crypt::{decrypt, encrypt};
-
 
 #[test]
 pub fn crypt_test() {

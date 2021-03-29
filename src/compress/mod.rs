@@ -1,6 +1,4 @@
-use flate2::bufread::GzDecoder;
-use flate2::write::GzEncoder;
-use flate2::Compression;
+use flate2::{bufread::GzDecoder, write::GzEncoder, Compression};
 use std::io::prelude::*;
 
 pub fn decompress(data: &[u8]) -> crate::Result<Vec<u8>> {

@@ -1,6 +1,8 @@
-use crate::compress::{compress, decompress};
-use crate::crypt::{decrypt, encrypt};
-use crate::utils::{json_bytes_to_data, to_json};
+use crate::{
+    compress::{compress, decompress},
+    crypt::{decrypt, encrypt},
+    utils::{json_bytes_to_data, to_json},
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
