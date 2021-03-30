@@ -1,6 +1,5 @@
-use tokio::net::TcpStream;
-
 use crate::{args::Args, connection::Connection};
+use tokio::net::TcpStream;
 
 pub struct Client {
     pub args: Args,

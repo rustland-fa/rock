@@ -1,13 +1,11 @@
-use std::sync::Arc;
-
+use crate::{config::BUFFER_SIZE, constants::SPLITTER, frame::PartFrame};
 use bytes::{Buf, BytesMut};
+use std::sync::Arc;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt, BufWriter},
     net::TcpStream,
     sync::{mpsc::unbounded_channel, Mutex},
 };
-
-use crate::{config::BUFFER_SIZE, constants::SPLITTER, frame::PartFrame};
 
 #[derive(Debug)]
 pub struct Connection {
@@ -31,10 +29,10 @@ impl Connection {
                 return Ok(Some(res));
             }
             if 0 == self.stream.read_buf(&mut self.buffer).await? {
-                if self.buffer.is_empty() {
-                    return Ok(None);
+                return if self.buffer.is_empty() {
+                    Ok(None)
                 } else {
-                    return Err("failed read buffer empty".into());
+                    Err("failed read buffer empty".into())
                 }
             }
         }
@@ -44,15 +42,15 @@ impl Connection {
         if 0 != self.stream.read_buf(&mut self.buffer).await? || !self.buffer.is_empty() {
             let len = self.buffer.len();
             let len = if len > BUFFER_SIZE { BUFFER_SIZE } else { len };
-            if let Some(index) = self.buffer[..len].iter().position(|i| i == &SPLITTER) {
+            return if let Some(index) = self.buffer[..len].iter().position(|i| i == &SPLITTER) {
                 let res = hex::decode(&self.buffer[..index])?.to_vec();
                 self.buffer.advance(index + 1);
-                return Ok(Some(PartFrame::End(res)));
+                Ok(Some(PartFrame::End(res)))
             } else {
                 let res = hex::decode(&self.buffer[..len])?.to_vec();
                 println!("res {:?}", res);
                 self.buffer.advance(len);
-                return Ok(Some(PartFrame::Continue(res)));
+                Ok(Some(PartFrame::Continue(res)))
             }
         }
         Err("failed read buffer empty".into())

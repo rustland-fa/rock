@@ -1,5 +1,6 @@
 use clap::Clap;
 use serde::{Deserialize, Serialize};
+
 #[derive(Debug, Clap, Default, Serialize, Deserialize)]
 #[clap(
     version = "0.1.0",
