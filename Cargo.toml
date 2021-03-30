@@ -1,5 +1,5 @@
 [package]
-name = "rock"
+name = "rk"
 version = "0.1.0"
 authors = ["mahdi robatipoor <mahdi.robatipoor@gmail.com>"]
 edition = "2018"

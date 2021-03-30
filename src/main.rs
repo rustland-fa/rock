@@ -1,5 +1,5 @@
 use args::get_args;
-use rock::server::Server;
+use rk::server::Server;
 
 mod args;
 

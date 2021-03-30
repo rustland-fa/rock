@@ -1,4 +1,4 @@
-use rock::compress::*;
+use rk::compress::*;
 
 #[test]
 pub fn compress_test() {

@@ -1,5 +1,5 @@
 use std::str::from_utf8;
-use rock::{connection::Connection, frame::PartFrame};
+use rk::{connection::Connection, frame::PartFrame};
 use tokio::net::TcpStream;
 
 #[tokio::main]

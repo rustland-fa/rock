@@ -1,4 +1,4 @@
-use rock::connection::Connection;
+use rk::connection::Connection;
 use tokio::net::TcpStream;
 
 #[tokio::main]

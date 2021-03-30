@@ -11,7 +11,6 @@ use tokio::net::UdpSocket;
 use trust_dns_resolver::{config::*, Resolver};
 
 pub fn generate_random_bytes() -> [u8; NONCE_LENGTH] {
-    // const generic support needed
     thread_rng().gen::<[u8; NONCE_LENGTH]>()
 }
 

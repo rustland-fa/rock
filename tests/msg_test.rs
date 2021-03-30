@@ -1,4 +1,4 @@
-use rock::message::Message;
+use rk::message::Message;
 
 const KEY: &[u8] = "this is very secret key 12345678".as_bytes();
 
