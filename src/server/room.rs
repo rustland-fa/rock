@@ -1,8 +1,6 @@
-use std::time::Duration;
-
-use tokio::time::Instant;
-
 use crate::connection::Connection;
+use std::time::Duration;
+use tokio::time::Instant;
 
 pub struct Room {
     pub first: Connection,

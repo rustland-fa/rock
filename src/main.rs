@@ -1,8 +1,7 @@
+use args::get_args;
 use rock::server::Server;
 
 mod args;
-
-use args::get_args;
 
 #[tokio::main]
 async fn main() {

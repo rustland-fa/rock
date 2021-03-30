@@ -6,8 +6,8 @@ use pnet::datalink;
 use rand::{seq::SliceRandom, thread_rng, Rng};
 use serde::{de::DeserializeOwned, Serialize};
 use sha2::{Digest, Sha256};
-use std::{net::IpAddr};
-use tokio::{net::UdpSocket};
+use std::net::IpAddr;
+use tokio::net::UdpSocket;
 use trust_dns_resolver::{config::*, Resolver};
 
 pub fn generate_random_bytes() -> [u8; NONCE_LENGTH] {

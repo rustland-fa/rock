@@ -1,5 +1,6 @@
 use rock::connection::Connection;
 use tokio::net::TcpStream;
+
 #[tokio::main]
 pub async fn main() {
     let socket = TcpStream::connect("127.0.0.1:8080").await.unwrap();
@@ -11,5 +12,5 @@ pub async fn main() {
         std::str::from_utf8(&data).unwrap()
     );
     conn.write_all(b"room1").await.unwrap();
-    let c = conn.read().await.unwrap();
+    conn.read().await.unwrap();
 }
