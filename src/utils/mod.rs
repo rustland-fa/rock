@@ -20,36 +20,31 @@ pub fn json_bytes_to_data<T: DeserializeOwned>(slice: &[u8]) -> crate::Result<T>
 }
 
 pub fn from_json<T: DeserializeOwned>(json: &str) -> crate::Result<T> {
-    let data = serde_json::from_str(json)?;
-    Ok(data)
+    serde_json::from_str(json).map_err(|e| e.into())
 }
 
 pub fn to_json<T: ?Sized + Serialize>(t: &T) -> crate::Result<String> {
-    let json = serde_json::to_string(t)?;
-    Ok(json)
+    serde_json::to_string(t).map_err(|e| e.into())
 }
 
 pub fn sha256(data: &[u8]) -> crate::Result<String> {
     let mut hasher = Sha256::new();
     hasher.update(data);
-    let hash = &hasher.finalize()[..];
-    byte_to_hex_lower_case(hash)
+    byte_to_hex_lower_case(&hasher.finalize()[..])
 }
 
 pub fn byte_to_hex_lower_case(data: &[u8]) -> crate::Result<String> {
-    let res = data
+    Ok(data
         .iter()
         .map(|b| format!("{:02x?}", b))
-        .collect::<String>();
-    Ok(res)
+        .collect::<String>())
 }
 
 pub fn byte_to_hex_upper_case(data: &[u8]) -> crate::Result<String> {
-    let res = data
+    Ok(data
         .iter()
         .map(|b| format!("{:02X?}", b))
-        .collect::<String>();
-    Ok(res)
+        .collect::<String>())
 }
 
 pub async fn public_ip_addr(ip_version: IpVersion) -> crate::Result<IpAddr> {
@@ -62,8 +57,7 @@ pub async fn public_ip_addr(ip_version: IpVersion) -> crate::Result<IpAddr> {
 }
 
 pub async fn get(url: &str) -> crate::Result<String> {
-    let resp = reqwest::get(url).await?.text().await?;
-    Ok(resp)
+    reqwest::get(url).await?.text().await.map_err(|e| e.into())
 }
 
 pub async fn local_ip_v4_addr() -> crate::Result<IpAddr> {

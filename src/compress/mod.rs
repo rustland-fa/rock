@@ -11,6 +11,5 @@ pub fn decompress(data: &[u8]) -> crate::Result<Vec<u8>> {
 pub fn compress(data: &[u8]) -> crate::Result<Vec<u8>> {
     let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
     encoder.write_all(data)?;
-    let data = encoder.finish()?;
-    Ok(data)
+    encoder.finish().map_err(|e| e.into())
 }
