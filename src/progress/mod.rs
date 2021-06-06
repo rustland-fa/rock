@@ -23,7 +23,7 @@ impl ProgressBar {
         let pos = pos.min(self.total_size);
         self.pb.set_position(pos);
         if pos == self.total_size {
-            self.pb.finish_with_message(&self.finish_msg);
+            self.pb.finish_with_message(self.finish_msg.clone());
         }
     }
 }
