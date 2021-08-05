@@ -1,17 +1,30 @@
-use crate::{args::Args, connection::Connection};
+use crate::{args::Args, codec::MessageCodec, connection::Connection, message::Message};
+use futures::{AsyncReadExt, SinkExt, StreamExt};
 use tokio::net::TcpStream;
+use tokio_util::codec::Framed;
 
 pub struct Client {
     pub args: Args,
+    pub conn: TcpStream,
+}
+
+impl Client {
+
 }
 
 pub async fn new_connection(addr: &str, password: &str, room: &str) -> crate::Result<()> {
     let socket = TcpStream::connect(addr).await?;
-    let mut conn = Connection::new(socket);
-    // TODO generate STRONG Key
-    conn.write_all(password.as_bytes()).await?;
-    let _ip_and_banner = conn.read_to_end().await?;
-    conn.write_all(room.as_bytes()).await?;
-    let _result = conn.read_to_end().await?;
+    let frame = Framed::new(socket, MessageCodec);
+    let (mut sink, mut stream) = frame.split();
+    while let Some(Ok(s)) = stream.next().await {
+        match s {
+            Message::Fin => {
+                break;
+            }
+            _ => {
+
+            }
+        }
+    }
     Ok(())
 }

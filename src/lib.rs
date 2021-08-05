@@ -6,6 +6,7 @@ pub type Result<T = String> = result::Result<T, Box<dyn error::Error + Send + Sy
 
 pub mod args;
 pub mod client;
+pub mod codec;
 pub mod compress;
 pub mod config;
 pub mod connection;

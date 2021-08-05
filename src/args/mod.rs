@@ -28,7 +28,7 @@ pub struct Args {
     #[clap(short, long)]
     only_local: bool,
     #[clap(short, long)]
-    diable_local: bool,
+    disable_local: bool,
     #[clap(short, long)]
     no_compress: bool,
     #[clap(short, long)]
