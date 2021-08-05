@@ -1,14 +1,20 @@
 use crate::{
+    args::Args,
+    codec::MessageCodec,
     connection::{pipe, Connection},
     constants::DEL_ROOMS_DURATION_SECS,
+    message::Message,
     server::room::Room,
 };
+use futures::{AsyncReadExt, SinkExt, StreamExt};
+use log::info;
 use std::{collections::HashMap, sync::Arc, time::Duration};
 use tokio::{
     net::{TcpListener, TcpStream},
     sync::Mutex,
     time::sleep,
 };
+use tokio_util::codec::Framed;
 
 pub mod room;
 
@@ -57,8 +63,15 @@ impl Server {
         rooms: Arc<Mutex<HashMap<String, Room>>>,
         socket: TcpStream,
     ) -> crate::Result<()> {
-        println!("handler start");
-        let mut conn = Connection::new(socket);
+        info!("handler start");
+        // let mut conn = Connection::new(socket);
+        let frame = Framed::new(socket, MessageCodec);
+        let (mut sink, mut stream) = frame.split();
+        while let Some(Ok(msg)) = stream.next().await {
+            match msg {
+                _ => {}
+            }
+        }
         let data = conn.read_to_end().await?;
         if let Some(d) = data {
             let msg = std::str::from_utf8(&d)?;

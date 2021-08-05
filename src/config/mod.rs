@@ -17,6 +17,20 @@ pub enum IpVersion {
     V6,
 }
 
+#[derive(Debug)]
+pub struct ClientConfig {
+    pub server_adder: String,
+    pub password: String,
+    pub room: String,
+    pub rule: ClientRule,
+    pub opposite_side_key: Option<String>,
+}
+
+pub enum ClientRule {
+    Sender,
+    Receiver(String),
+}
+
 pub static RELAY_IP_ADDR_V6: Lazy<IpAddr> = Lazy::new(|| {
     utils::lookup_id(DEFAULT_RELAY_ADDR_V6)
         .unwrap_or_else(|_e| vec![IpAddr::V6(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0))])
