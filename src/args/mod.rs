@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clap, Default, Serialize, Deserialize)]
 #[clap(
-    version = "0.1.0",
+    version = "0.1.1",
     author = "Mahdi Robatipoor <mahdi.robatipoor@gmail.com>"
 )]
 pub struct Args {

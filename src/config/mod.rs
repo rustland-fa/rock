@@ -1,4 +1,4 @@
-use crate::{args::Args, utils};
+use crate::{args::Args, message::PeerType, utils};
 use once_cell::sync::Lazy;
 use std::{
     net::{IpAddr, Ipv4Addr, Ipv6Addr},
@@ -20,16 +20,12 @@ pub enum IpVersion {
 #[derive(Debug)]
 pub struct ClientConfig {
     pub server_adder: String,
+    pub username :String ,
     pub password: String,
-    pub room: String,
-    pub rule: ClientRule,
-    pub opposite_side_key: Option<String>,
+    pub room_name: String,
+    pub peer_type: PeerType,
 }
 
-pub enum ClientRule {
-    Sender,
-    Receiver(String),
-}
 
 pub static RELAY_IP_ADDR_V6: Lazy<IpAddr> = Lazy::new(|| {
     utils::lookup_id(DEFAULT_RELAY_ADDR_V6)

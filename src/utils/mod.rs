@@ -23,8 +23,8 @@ pub fn from_json<T: DeserializeOwned>(json: &str) -> crate::Result<T> {
     serde_json::from_str(json).map_err(|e| e.into())
 }
 
-pub fn to_json<T: ?Sized + Serialize>(t: &T) -> crate::Result<String> {
-    serde_json::to_string(t).map_err(|e| e.into())
+pub fn to_json<T: ?Sized + Serialize>(value: &T) -> crate::Result<String> {
+    serde_json::to_string(value).map_err(|e| e.into())
 }
 
 pub fn sha256(data: &[u8]) -> crate::Result<String> {
