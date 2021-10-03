@@ -20,12 +20,11 @@ pub enum IpVersion {
 #[derive(Debug)]
 pub struct ClientConfig {
     pub server_adder: String,
-    pub username :String ,
+    pub username: String,
     pub password: String,
     pub room_name: String,
     pub peer_type: PeerType,
 }
-
 
 pub static RELAY_IP_ADDR_V6: Lazy<IpAddr> = Lazy::new(|| {
     utils::lookup_id(DEFAULT_RELAY_ADDR_V6)

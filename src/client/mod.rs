@@ -1,17 +1,16 @@
-use core::panic;
 use std::{
     convert::{TryFrom, TryInto},
-    path::PathBuf,
     time::Duration,
 };
 
-use crate::{
-    config::ClientConfig,
-    message::{Message, PeerType, StartReq, StartTrans},
-};
+use crate::message::{Message, PeerType, StartReq, StartTrans};
 use futures::{SinkExt, StreamExt};
-use log::info;
-use tokio::time::sleep;
+use log::{error, info};
+use tokio::{
+    fs::File,
+    io::{AsyncReadExt, AsyncWriteExt},
+    time::sleep,
+};
 use tokio_tungstenite::{connect_async, tungstenite};
 
 #[derive(Debug)]
@@ -49,54 +48,105 @@ impl Client {
         }
     }
 
-    pub async fn connect(&self) {
+    pub async fn connect(mut self) {
+        // TODO auth
         let (socket, _) = connect_async(&self.server_addr).await.unwrap();
         let (mut sink, mut stream) = socket.split();
         let req = Message::StartReq(StartReq {
             peer_type: self.peer_type,
             room_name: self.room_name.clone(),
         });
+        let mut repeat = self.repeat;
         sink.send(req.try_into().unwrap()).await.unwrap();
         while let Some(Ok(msg)) = stream.next().await {
             let msg = Message::try_from(&msg).unwrap();
             match msg {
-                Message::StartAck(req) => {
-                    info!("get start ack request {}", req);
+                Message::StartAck(resp) => {
+                    info!("receive start ack request message : {}", resp);
                     if self.peer_type == PeerType::Sender {
-                        let msg = self.send_start_trans_req();
+                        let msg = start_trans_req(&self.path_file, self.file_size).unwrap();
                         sink.send(msg).await.unwrap();
                     }
                 }
-                Message::StartNack(_) => {
-                    sleep(Self::DELAY).await;
-                    let msg = self.send_start_trans_req();
-                    sink.send(msg).await.unwrap();
+                Message::StartNack(err) => {
+                    error!("failed start request error message : {}", err);
+                    return;
                 }
-                Message::StartTrans(_) => {
+                Message::StartTrans(req) => {
                     if self.peer_type == PeerType::Receiver {
-                        // sink.send(Message::TransAck(""))
+                        self.file_size = req.total_size;
+                        self.path_file = req.name_file;
+                        sink.send(Message::TransAck("ok".to_string()).try_into().unwrap())
+                            .await
+                            .unwrap();
                     } else {
-                        panic!("")
+                        error!("invalid request");
                     }
                 }
-                Message::TransAck(_) => {
-                    info!("Start Ack Send DATA");
-                    //  sink.send(Message::Data(""))
+                Message::TransAck(req) => {
+                    info!("trans ack receive message : {}", req);
+                    break;
                 }
-                Message::TransNack(_) => {}
-                Message::Fin => {
-                    // stop
+                Message::TransNack(req) => {
+                    info!("trans nack receive error message : {}", req);
+                    if repeat == 0 {
+                        return;
+                    }
+                    sleep(Self::DELAY).await;
+                    let msg = start_trans_req(&self.path_file, self.file_size).unwrap();
+                    sink.send(msg).await.unwrap();
+                    repeat -= 1;
                 }
-                _ => {}
+                _ => {
+                    error!("invalid request");
+                    return;
+                }
+            }
+        }
+
+        match self.peer_type {
+            PeerType::Sender => {
+                let mut file = File::open(&self.path_file).await.unwrap();
+                let mut buf = Vec::new();
+                file.read_to_end(&mut buf).await.unwrap();
+                sink.send(tungstenite::Message::Binary(buf)).await.unwrap();
+                sink.send(Message::Fin.try_into().unwrap()).await.unwrap();
+                sink.close().await.unwrap();
+            }
+            PeerType::Receiver => {
+                let mut buffer = File::create(&self.path_file).await.unwrap();
+                while let Some(Ok(msg)) = stream.next().await {
+                    if msg.is_binary() {
+                        let data = msg.into_data();
+                        info!("data len : {}", data.len());
+                        buffer.write(&data).await.unwrap();
+                    } else if msg.is_text() {
+                        let msg = Message::try_from(&msg).unwrap();
+                        match msg {
+                            Message::Fin => {
+                                info!("success download");
+                                sink.close().await.unwrap();
+                                return;
+                            }
+                            _ => {
+                                error!("invalid request");
+                                return;
+                            }
+                        }
+                    }
+                }
             }
         }
     }
+}
 
-    pub fn send_start_trans_req(&self) -> tungstenite::Message {
-        let trans_req = StartTrans {
-            name_file: self.path_file.clone(),
-            total_size: self.file_size,
-        };
-        Message::StartTrans(trans_req).try_into().unwrap()
-    }
+pub fn start_trans_req(
+    path_file: &String,
+    file_size: usize,
+) -> crate::Result<tungstenite::Message> {
+    let trans_req = StartTrans {
+        name_file: path_file.clone(),
+        total_size: file_size,
+    };
+    Ok(Message::StartTrans(trans_req).try_into().unwrap())
 }

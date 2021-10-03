@@ -34,7 +34,7 @@ pub struct StartTrans {
     pub total_size: usize,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq,Clone, Copy)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone, Copy)]
 pub enum PeerType {
     Sender,
     Receiver,
