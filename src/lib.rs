@@ -1,8 +1,6 @@
 #![allow(dead_code)]
 
-use std::result;
-
-pub type Result<T = String> = result::Result<T, Box<dyn std::error::Error + Send + Sync + 'static>>;
+pub type Result<T = ()> = std::result::Result<T, crate::error::Error>;
 
 pub mod args;
 pub mod client;

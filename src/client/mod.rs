@@ -15,7 +15,7 @@ use tokio_tungstenite::{connect_async, tungstenite};
 
 #[derive(Debug)]
 pub struct Client {
-    pub server_addr: url::Url,
+    pub server_addr: String,
     pub username: String,
     pub password: String,
     pub room_name: String,
@@ -28,17 +28,22 @@ pub struct Client {
 impl Client {
     pub const DELAY: Duration = Duration::from_secs(3);
     pub fn new(
-        server_addr: &String,
+        server_addr: String,
         username: String,
         password: String,
-        path_file: String,
         room_name: String,
-        repeat: usize,
+        path_file: String,
+        repeat: Option<usize>,
         peer_type: PeerType,
     ) -> Self {
+        let repeat = repeat.unwrap_or_default();
+        let file_size = match peer_type {
+            PeerType::Sender => std::fs::metadata(&path_file).unwrap().len() as usize,
+            _ => 0,
+        };
         Self {
-            server_addr: url::Url::parse(server_addr).expect("Can't connect to case count URL"),
-            file_size: std::fs::metadata(&path_file).unwrap().len() as usize,
+            server_addr,
+            file_size,
             username,
             password,
             path_file,
@@ -48,7 +53,7 @@ impl Client {
         }
     }
 
-    pub async fn connect(mut self) {
+    pub async fn connect(mut self) -> crate::Result {
         // TODO auth
         let (socket, _) = connect_async(&self.server_addr).await.unwrap();
         let (mut sink, mut stream) = socket.split();
@@ -56,8 +61,8 @@ impl Client {
             peer_type: self.peer_type,
             room_name: self.room_name.clone(),
         });
-        let mut repeat = self.repeat;
         sink.send(req.try_into().unwrap()).await.unwrap();
+        let mut repeat = self.repeat;
         while let Some(Ok(msg)) = stream.next().await {
             let msg = Message::try_from(&msg).unwrap();
             match msg {
@@ -70,27 +75,23 @@ impl Client {
                 }
                 Message::StartNack(err) => {
                     error!("failed start request error message : {}", err);
-                    return;
+                    return Err(crate::error::Error::ResponseError("".to_string()));
                 }
-                Message::StartTrans(req) => {
-                    if self.peer_type == PeerType::Receiver {
-                        self.file_size = req.total_size;
-                        self.path_file = req.name_file;
-                        sink.send(Message::TransAck("ok".to_string()).try_into().unwrap())
-                            .await
-                            .unwrap();
-                    } else {
-                        error!("invalid request");
-                    }
+                Message::StartTrans(resp) if self.peer_type == PeerType::Receiver => {
+                    self.file_size = resp.total_size;
+                    self.path_file = resp.name_file;
+                    sink.send(Message::TransAck("ok".to_string()).try_into().unwrap())
+                        .await
+                        .unwrap();
                 }
-                Message::TransAck(req) => {
-                    info!("trans ack receive message : {}", req);
+                Message::TransAck(resp) if self.peer_type == PeerType::Sender => {
+                    info!("trans ack receive message : {}", resp);
                     break;
                 }
-                Message::TransNack(req) => {
+                Message::TransNack(req) if self.peer_type == PeerType::Sender => {
                     info!("trans nack receive error message : {}", req);
                     if repeat == 0 {
-                        return;
+                        return Err(crate::error::Error::ResponseError("".to_string()));
                     }
                     sleep(Self::DELAY).await;
                     let msg = start_trans_req(&self.path_file, self.file_size).unwrap();
@@ -99,7 +100,7 @@ impl Client {
                 }
                 _ => {
                     error!("invalid request");
-                    return;
+                    return Err(crate::error::Error::ResponseError("".to_string()));
                 }
             }
         }
@@ -118,7 +119,7 @@ impl Client {
                 while let Some(Ok(msg)) = stream.next().await {
                     if msg.is_binary() {
                         let data = msg.into_data();
-                        info!("data len : {}", data.len());
+                        info!("receiver data len : {}", data.len());
                         buffer.write(&data).await.unwrap();
                     } else if msg.is_text() {
                         let msg = Message::try_from(&msg).unwrap();
@@ -126,17 +127,18 @@ impl Client {
                             Message::Fin => {
                                 info!("success download");
                                 sink.close().await.unwrap();
-                                return;
+                                return Err(crate::error::Error::ResponseError("".to_string()));
                             }
                             _ => {
                                 error!("invalid request");
-                                return;
+                                return Err(crate::error::Error::ResponseError("".to_string()));
                             }
                         }
                     }
                 }
             }
         }
+        Ok(())
     }
 }
 

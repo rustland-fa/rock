@@ -167,8 +167,8 @@ pub async fn send_msg_to_receiver(
         .as_ref()
         .unwrap()
         .1
-        .send(msg)
-        .map_err(|e| e.into())
+        .send(msg)?;
+        Ok(())
 }
 
 pub async fn update_room(
