@@ -1,11 +1,8 @@
-use clap::Clap;
+use clap::Parser;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clap, Default, Serialize, Deserialize)]
-#[clap(
-    version = "0.1.1",
-    author = "Mahdi Robatipoor <mahdi.robatipoor@gmail.com>"
-)]
+#[derive(Debug, Parser, Default, Serialize, Deserialize)]
+#[clap(author, version, about, long_about = Some("rock cli description"))]
 pub struct Args {
     #[clap(short, long)]
     share_secret_key: String,
